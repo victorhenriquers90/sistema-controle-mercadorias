@@ -5897,6 +5897,7 @@ function App({user, familyId, familyNome, isAdmin, familyPlan="basico", planStat
   const [showUpgradeModal,   setShowUpgradeModal]   = useState(false);
   const [upgradeContext,     setUpgradeContext]     = useState(""); // qual recurso pediu o upgrade
   const [isOnline,           setIsOnline]           = useState(()=>typeof navigator==="undefined" ? true : navigator.onLine !== false);
+  const [syncIssues,         setSyncIssues]         = useState([]);
 
   // Guard: exibe modal de upgrade se recurso precisa de plano pago
   function requirePlan(minPlan, resourceName){
@@ -6192,6 +6193,25 @@ function App({user, familyId, familyNome, isAdmin, familyPlan="basico", planStat
 
   const notify = msg => { setToast(msg); setTimeout(()=>setToast(""),2500); };
 
+  function syncErrorMessage(err){
+    const code = String(err?.code || "");
+    if(code.includes("permission-denied")) return "Sem permissao para ler estes dados. Verifique login, familia e regras do Firestore.";
+    if(code.includes("failed-precondition")) return "O Firestore precisa de um indice para esta consulta.";
+    if(code.includes("unavailable")) return "Conexao instavel com o Firestore. O app tentara sincronizar novamente.";
+    return err?.message || "Nao foi possivel sincronizar estes dados.";
+  }
+
+  function markSyncOk(scope){
+    setSyncIssues(prev => prev.some(item => item.scope === scope) ? prev.filter(item => item.scope !== scope) : prev);
+  }
+
+  function markSyncIssue(scope, err){
+    const now = new Date().toLocaleTimeString("pt-BR", {hour:"2-digit", minute:"2-digit"});
+    const issue = {scope, message: syncErrorMessage(err), at: now};
+    console.warn("[LaviApp sync]", scope, err);
+    setSyncIssues(prev => [issue, ...prev.filter(item => item.scope !== scope)].slice(0, 5));
+  }
+
   useEffect(()=>{
     if(!emailVerifyCooldownUntil) return;
     const id = setInterval(()=>setEmailVerifyCooldownNow(Date.now()), 1000);
@@ -6458,26 +6478,35 @@ function App({user, familyId, familyNome, isAdmin, familyPlan="basico", planStat
     let loaded=0;
     const done=()=>{ loaded++; if(loaded>=11) setLoading(false); };
 
-    const unsubExp   = onSnapshot(query(expCol,  orderBy("createdAt","desc")), snap=>{ setExpenses(sortExpensesByDateDesc(snap.docs.map(d=>({id:d.id,...d.data()})))); done(); }, ()=>done());
-    const unsubInc   = onSnapshot(query(incCol,  orderBy("createdAt","desc")), snap=>{ setIncomes( snap.docs.map(d=>({id:d.id,...d.data()}))); done(); }, ()=>done());
-    const unsubBills = onSnapshot(query(billsCol,orderBy("createdAt","desc")), snap=>{ setBills(   snap.docs.map(d=>({id:d.id,...d.data()}))); done(); }, ()=>done());
-    const unsubDebts = onSnapshot(query(debtsCol,orderBy("createdAt","desc")), snap=>{ setDebts(   snap.docs.map(d=>({id:d.id,...d.data()}))); done(); }, ()=>done());
-    const unsubFins  = onSnapshot(query(finCol,  orderBy("createdAt","desc")), snap=>{ setFins(    snap.docs.map(d=>({id:d.id,...d.data()}))); done(); }, ()=>done());
-    const unsubAcpag = onSnapshot(query(acpagCol,orderBy("createdAt","desc")), snap=>{ setAcpag(   snap.docs.map(d=>({id:d.id,...d.data()}))); done(); }, ()=>done());
-    const unsubFb      = onSnapshot(query(fbCol,       orderBy("createdAt","desc")), snap=>{ setFixedBills(snap.docs.map(d=>({id:d.id,...d.data()}))); done(); }, ()=>done());
+    const listen = (ref, scope, onData, countsForLoading=true) => onSnapshot(ref, snap=>{
+      markSyncOk(scope);
+      onData(snap);
+      if(countsForLoading) done();
+    }, err=>{
+      markSyncIssue(scope, err);
+      if(countsForLoading) done();
+    });
+
+    const unsubExp   = listen(query(expCol,  orderBy("createdAt","desc")), "Gastos", snap=>{ setExpenses(sortExpensesByDateDesc(snap.docs.map(d=>({id:d.id,...d.data()})))); });
+    const unsubInc   = listen(query(incCol,  orderBy("createdAt","desc")), "Rendas", snap=>{ setIncomes( snap.docs.map(d=>({id:d.id,...d.data()}))); });
+    const unsubBills = listen(query(billsCol,orderBy("createdAt","desc")), "Alertas", snap=>{ setBills(   snap.docs.map(d=>({id:d.id,...d.data()}))); });
+    const unsubDebts = listen(query(debtsCol,orderBy("createdAt","desc")), "Dividas", snap=>{ setDebts(   snap.docs.map(d=>({id:d.id,...d.data()}))); });
+    const unsubFins  = listen(query(finCol,  orderBy("createdAt","desc")), "Financiamentos", snap=>{ setFins(    snap.docs.map(d=>({id:d.id,...d.data()}))); });
+    const unsubAcpag = listen(query(acpagCol,orderBy("createdAt","desc")), "A pagar e receber", snap=>{ setAcpag(   snap.docs.map(d=>({id:d.id,...d.data()}))); });
+    const unsubFb      = listen(query(fbCol,       orderBy("createdAt","desc")), "Contas fixas", snap=>{ setFixedBills(snap.docs.map(d=>({id:d.id,...d.data()}))); });
     // Tipos personalizados de contas (não afeta o contador done)
-    const unsubFbTypes = onSnapshot(query(fbTypesCol, orderBy("createdAt","asc")), snap=>{ setCustomBillTypes(snap.docs.map(d=>({id:d.id,...d.data()}))); }, ()=>{});
-    const unsubInv   = onSnapshot(query(invCol,  orderBy("createdAt","desc")), snap=>{ setInvestments(snap.docs.map(d=>({id:d.id,...d.data()}))); done(); }, ()=>done());
-    const unsubTrips = onSnapshot(query(tripsCol,orderBy("createdAt","desc")), snap=>{ setTrips(snap.docs.map(d=>({id:d.id,...d.data()}))); done(); }, ()=>done());
-    const unsubVale = onSnapshot(query(valeCol,orderBy("createdAt","desc")), snap=>{ setValeAlimentacao(snap.docs.map(d=>({id:d.id,...d.data()}))); done(); }, ()=>done());
-    const unsubCreditAdjust = onSnapshot(query(creditAdjCol,orderBy("updatedAt","desc")), snap=>{ setCreditAdjustments(snap.docs.map(d=>({id:d.id,...d.data()}))); done(); }, ()=>done());
-    const unsubMonthClosings = onSnapshot(query(monthClosingsCol,orderBy("createdAt","desc")), snap=>{ setMonthClosings(snap.docs.map(d=>({id:d.id,...d.data()}))); }, ()=>{});
-    const unsubRecInc = onSnapshot(query(recurringIncomesCol,orderBy("createdAt","desc")), snap=>{ setRecurringIncomes(snap.docs.map(d=>({id:d.id,...d.data()}))); }, ()=>{});
-    const unsubRecExp = onSnapshot(query(recurringExpensesCol,orderBy("createdAt","desc")), snap=>{ setRecurringExpenses(snap.docs.map(d=>({id:d.id,...d.data()}))); }, ()=>{});
-    const unsubCardProfiles = onSnapshot(query(cardProfilesCol,orderBy("createdAt","desc")), snap=>{ setCardProfiles(snap.docs.map(d=>({id:d.id,...d.data()}))); }, ()=>{});
-    const unsubActivityLogs = onSnapshot(query(activityLogsCol,orderBy("createdAt","desc")), snap=>{ setActivityLogs(snap.docs.slice(0,80).map(d=>({id:d.id,...d.data()}))); }, ()=>{});
-    const unsubFamilySettings = onSnapshot(familySettingsDoc, d=>{ setFamilySettings(d.exists() ? (d.data()||{}) : {}); }, ()=>{});
-    const unsubMembers = onSnapshot(query(membersCol,orderBy("createdAt","asc")), snap=>{
+    const unsubFbTypes = listen(query(fbTypesCol, orderBy("createdAt","asc")), "Tipos de conta", snap=>{ setCustomBillTypes(snap.docs.map(d=>({id:d.id,...d.data()}))); }, false);
+    const unsubInv   = listen(query(invCol,  orderBy("createdAt","desc")), "Investimentos", snap=>{ setInvestments(snap.docs.map(d=>({id:d.id,...d.data()}))); });
+    const unsubTrips = listen(query(tripsCol,orderBy("createdAt","desc")), "Passeios", snap=>{ setTrips(snap.docs.map(d=>({id:d.id,...d.data()}))); });
+    const unsubVale = listen(query(valeCol,orderBy("createdAt","desc")), "Vale alimentacao", snap=>{ setValeAlimentacao(snap.docs.map(d=>({id:d.id,...d.data()}))); });
+    const unsubCreditAdjust = listen(query(creditAdjCol,orderBy("updatedAt","desc")), "Cartao familiar", snap=>{ setCreditAdjustments(snap.docs.map(d=>({id:d.id,...d.data()}))); });
+    const unsubMonthClosings = listen(query(monthClosingsCol,orderBy("createdAt","desc")), "Fechamentos", snap=>{ setMonthClosings(snap.docs.map(d=>({id:d.id,...d.data()}))); }, false);
+    const unsubRecInc = listen(query(recurringIncomesCol,orderBy("createdAt","desc")), "Receitas recorrentes", snap=>{ setRecurringIncomes(snap.docs.map(d=>({id:d.id,...d.data()}))); }, false);
+    const unsubRecExp = listen(query(recurringExpensesCol,orderBy("createdAt","desc")), "Despesas recorrentes", snap=>{ setRecurringExpenses(snap.docs.map(d=>({id:d.id,...d.data()}))); }, false);
+    const unsubCardProfiles = listen(query(cardProfilesCol,orderBy("createdAt","desc")), "Cartoes", snap=>{ setCardProfiles(snap.docs.map(d=>({id:d.id,...d.data()}))); }, false);
+    const unsubActivityLogs = listen(query(activityLogsCol,orderBy("createdAt","desc")), "Historico", snap=>{ setActivityLogs(snap.docs.slice(0,80).map(d=>({id:d.id,...d.data()}))); }, false);
+    const unsubFamilySettings = listen(familySettingsDoc, "Configuracoes da familia", d=>{ setFamilySettings(d.exists() ? (d.data()||{}) : {}); }, false);
+    const unsubMembers = listen(query(membersCol,orderBy("createdAt","asc")), "Membros", snap=>{
       const cadastrados = snap.docs.map(d=>(d.data().nome||"").trim()).filter(Boolean);
       // Lê nomes da família no Firestore (membros registrados + membrosNomes do onboarding)
       getDoc(doc(familiesCol, familyId)).then(fd=>{
@@ -6497,15 +6526,15 @@ function App({user, familyId, familyNome, isAdmin, familyPlan="basico", planStat
         const todos = Array.from(new Set(cadastrados)).filter(m=>m&&m!=="Família"&&m!=="Outros");
         setFamilyMembers(todos.length>0 ? ["Família",...todos,"Outros"] : ["Família","Outros"]);
       });
-    }, ()=>{});
-    const unsubCatItems = onSnapshot(query(catItemsCol,orderBy("createdAt","asc")), snap=>{
+    }, false);
+    const unsubCatItems = listen(query(catItemsCol,orderBy("createdAt","asc")), "Itens de categoria", snap=>{
       setCategoryItems(snap.docs.map(d=>({id:d.id,...d.data()})));
-    }, ()=>{});
-    const unsubCustomCategories = onSnapshot(query(customCategoriesCol,orderBy("createdAt","asc")), snap=>{
+    }, false);
+    const unsubCustomCategories = listen(query(customCategoriesCol,orderBy("createdAt","asc")), "Categorias", snap=>{
       const cats = snap.docs.map(d=>({id:d.id,...d.data()}));
       syncCustomCategoriesGlobal(cats);
       setCustomCategories(cats);
-    }, ()=>{});
+    }, false);
 
     getDoc(goalsDoc).then(d=>{ if(d.exists()) setGoals(d.data()); }).catch(()=>{});
     getDoc(monthlyGoalsDoc).then(d=>{ if(d.exists()){ const vals={...defaultMonthlyTargets,...d.data()}; setMonthlyTargets(vals); setMonthlyGoalForm({mercado:fmtInputBRL(vals.mercado),lazer:fmtInputBRL(vals.lazer),cartao:fmtInputBRL(vals.cartao),economia:fmtInputBRL(vals.economia)}); } }).catch(()=>{});
@@ -8850,6 +8879,23 @@ function App({user, familyId, familyNome, isAdmin, familyPlan="basico", planStat
         e("div",{style:{fontSize:11,fontWeight:900,color:"#FDE68A",letterSpacing:1,textTransform:"uppercase"}},"Modo offline"),
         e("div",{style:{fontSize:11,color:"#F8FAFC",lineHeight:1.35}},"Você pode abrir o app; novas sincronizações acontecem quando a conexão voltar.")
       )
+    ),
+
+    syncIssues.length>0&&e("div",{style:{margin:"12px 14px 0",padding:"12px",borderRadius:16,background:"rgba(251,113,133,.12)",border:"1px solid rgba(251,113,133,.34)",boxShadow:"0 12px 34px rgba(0,0,0,.18)",fontFamily:"Inter,system-ui,sans-serif"}},
+      e("div",{style:{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:10,marginBottom:8}},
+        e("div",{style:{minWidth:0}},
+          e("div",{style:{fontSize:11,fontWeight:900,color:"#FDA4AF",letterSpacing:1.2,textTransform:"uppercase",marginBottom:3}},"Atenção na sincronização"),
+          e("div",{style:{fontSize:12,color:"#F8FAFC",lineHeight:1.4}},"Alguns dados não carregaram agora. O app continua aberto e tentará atualizar quando possível.")
+        ),
+        e("button",{onClick:()=>setSyncIssues([]),style:{padding:"8px 10px",borderRadius:12,border:"1px solid rgba(251,113,133,.38)",background:"rgba(15,23,42,.72)",color:"#FDA4AF",fontFamily:"inherit",fontSize:11,fontWeight:900,cursor:"pointer",whiteSpace:"nowrap"}},"Limpar")
+      ),
+      syncIssues.slice(0,3).map(issue=>e("div",{key:issue.scope,style:{display:"grid",gridTemplateColumns:"1fr auto",gap:8,padding:"8px 0",borderTop:"1px solid rgba(255,255,255,.08)",alignItems:"start"}},
+        e("div",{style:{minWidth:0}},
+          e("div",{style:{fontSize:12,fontWeight:900,color:"#F8FAFC",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}},issue.scope),
+          e("div",{style:{fontSize:11,color:"#FECACA",lineHeight:1.35,marginTop:2}},issue.message)
+        ),
+        e("div",{style:{fontSize:10,color:"#94A3B8",whiteSpace:"nowrap"}},issue.at)
+      ))
     ),
 
     // ── Modal Detalhes do Resumo Financeiro ───────────────────────────────────
