@@ -12447,10 +12447,10 @@ function App({user, familyId, familyNome, isAdmin, familyPlan="basico", planStat
 
         e("div",{className:"lavi-quick-actions","aria-label":"Ações rápidas"},
           [
-            {label:"Gasto",svg:"plus-circle",color:"#FFF7ED",view:"add",border:"1px solid rgba(251,146,60,.72)",background:"linear-gradient(145deg,#7C2D12,#EA580C 58%,#FDBA74)",shadow:"0 14px 28px rgba(234,88,12,.32), inset 0 1px 0 rgba(255,237,213,.36)"},
+            {label:"Relatórios",svg:"download",color:"#FDE68A",view:"reports",background:"linear-gradient(145deg,#3A2A0A,#B45309 58%,#F6C768)",shadow:"0 14px 28px rgba(180,83,9,.24), inset 0 1px 0 rgba(254,243,199,.24)"},
             {label:"Ver mês",svg:"calendar",color:"#60A5FA",view:"monthlyaccounts",background:"linear-gradient(145deg,#0F2743,#1D4ED8 58%,#60A5FA)",shadow:"0 14px 28px rgba(37,99,235,.24), inset 0 1px 0 rgba(191,219,254,.26)"},
             {label:"Família",svg:"users",color:"#34D399",view:"familia",background:"linear-gradient(145deg,#073A36,#0F766E 58%,#2DD4BF)",shadow:"0 14px 28px rgba(20,184,166,.22), inset 0 1px 0 rgba(204,251,241,.22)"},
-            {label:"Relatórios",svg:"download",color:"#FDE68A",view:"reports",background:"linear-gradient(145deg,#3A2A0A,#B45309 58%,#F6C768)",shadow:"0 14px 28px rgba(180,83,9,.24), inset 0 1px 0 rgba(254,243,199,.24)"}
+            {label:"Gasto",svg:"plus-circle",color:"#FFF7ED",view:"add",border:"1px solid rgba(251,146,60,.72)",background:"linear-gradient(145deg,#7C2D12,#EA580C 58%,#FDBA74)",shadow:"0 14px 28px rgba(234,88,12,.32), inset 0 1px 0 rgba(255,237,213,.36)"}
           ].map(action=>e("button",{
             key:action.label,
             className:"lavi-quick-action",
