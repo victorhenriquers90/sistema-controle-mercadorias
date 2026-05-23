@@ -2788,21 +2788,55 @@ textarea:focus-visible {
   font-size: clamp(10px, 2.9vw, 13px) !important;
 }
 
-.lavi-login-shell {
+.lavi-login-shell,
+.lavi-security-shell {
   min-height: 100vh;
+  min-height: 100svh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 24px 18px;
-  background:
-    linear-gradient(180deg, #101827 0%, #0B1220 100%);
   color: #F8FAFC;
   position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    linear-gradient(90deg, rgba(7,13,23,.96) 0%, rgba(7,13,23,.82) 46%, rgba(7,13,23,.95) 100%),
+    url("/hero-family-laviapp.jpg") center / cover no-repeat;
+}
+
+.lavi-login-shell::before,
+.lavi-security-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(2,6,23,.30), rgba(2,6,23,.88)),
+    linear-gradient(90deg, rgba(15,23,42,.94) 0%, rgba(15,23,42,.66) 48%, rgba(15,23,42,.92) 100%);
+}
+
+.lavi-login-shell::after,
+.lavi-security-shell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: .28;
+  background-image:
+    linear-gradient(rgba(255,255,255,.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,.72), transparent 82%);
 }
 
 .lavi-login-panel {
   width: 100%;
   max-width: 392px;
+  position: relative;
+  z-index: 1;
 }
 
 .lavi-login-brand {
@@ -2816,7 +2850,11 @@ textarea:focus-visible {
 .lavi-login-logo {
   width: 84px;
   height: 84px;
-  filter: drop-shadow(0 14px 36px rgba(30,80,240,.45));
+  border-radius: 22px;
+  box-shadow:
+    0 18px 42px rgba(2,6,23,.46),
+    0 0 0 1px rgba(255,255,255,.12);
+  filter: drop-shadow(0 12px 28px rgba(45,212,191,.20));
 }
 
 .lavi-login-title {
@@ -2855,12 +2893,16 @@ textarea:focus-visible {
 }
 
 .lavi-login-card {
-  background: rgba(15,23,42,.84);
-  border: 1px solid rgba(148,163,184,.18);
+  background:
+    linear-gradient(180deg, rgba(15,23,42,.94), rgba(8,13,24,.92));
+  border: 1px solid rgba(226,232,240,.16);
   border-radius: 8px;
   padding: 22px;
-  box-shadow: 0 20px 54px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.04);
-  backdrop-filter: blur(16px);
+  box-shadow:
+    0 24px 60px rgba(2,6,23,.44),
+    inset 0 1px 0 rgba(255,255,255,.06);
+  backdrop-filter: blur(18px) saturate(1.08);
+  -webkit-backdrop-filter: blur(18px) saturate(1.08);
 }
 
 .lavi-login-card-head {
@@ -2904,6 +2946,15 @@ textarea:focus-visible {
   min-height: 50px;
   padding: 13px 14px;
   font-size: 15px !important;
+  border-color: rgba(148,163,184,.22) !important;
+  background: rgba(2,6,23,.44) !important;
+}
+
+.lavi-login-card input:focus {
+  border-color: rgba(45,212,191,.62) !important;
+  box-shadow:
+    0 0 0 4px rgba(45,212,191,.12),
+    inset 0 1px 0 rgba(255,255,255,.04) !important;
 }
 
 .lavi-login-password {
@@ -2946,11 +2997,13 @@ textarea:focus-visible {
   width: 100%;
   min-height: 50px;
   border: 0;
-  background: #2DD4BF;
+  background: linear-gradient(135deg, #2DD4BF, #7DD3FC);
   color: #06221F;
   font-size: 15px;
   font-weight: 900 !important;
-  box-shadow: 0 14px 28px rgba(45,212,191,.20);
+  box-shadow:
+    0 16px 34px rgba(45,212,191,.22),
+    inset 0 1px 0 rgba(255,255,255,.36);
 }
 
 .lavi-login-primary:disabled {
@@ -2969,7 +3022,122 @@ textarea:focus-visible {
 .lavi-login-secondary {
   min-height: 42px;
   border: 1px solid rgba(148,163,184,.18);
-  background: rgba(148,163,184,.08);
+  background: rgba(15,23,42,.66);
+  color: #CBD5E1;
+  font-size: 13px;
+}
+
+.lavi-security-shell {
+  text-align: center;
+}
+
+.lavi-security-card {
+  width: 100%;
+  max-width: 392px;
+  position: relative;
+  z-index: 1;
+  padding: 28px 22px 22px;
+  border-radius: 8px;
+  border: 1px solid rgba(226,232,240,.16);
+  background:
+    linear-gradient(180deg, rgba(15,23,42,.94), rgba(8,13,24,.92));
+  box-shadow:
+    0 24px 60px rgba(2,6,23,.46),
+    inset 0 1px 0 rgba(255,255,255,.06);
+  backdrop-filter: blur(18px) saturate(1.08);
+  -webkit-backdrop-filter: blur(18px) saturate(1.08);
+}
+
+.lavi-security-logo {
+  width: 82px;
+  height: 82px;
+  margin: 0 auto 16px;
+  border-radius: 22px;
+  box-shadow:
+    0 18px 42px rgba(2,6,23,.46),
+    0 0 0 1px rgba(255,255,255,.12);
+  filter: drop-shadow(0 12px 28px rgba(45,212,191,.20));
+}
+
+.lavi-security-lockup .lavi-brand-word {
+  font-size: 28px;
+}
+
+.lavi-security-lockup .lavi-brand-tag {
+  font-size: 7px;
+}
+
+.lavi-security-eyebrow {
+  margin: 8px 0 18px;
+  color: #94A3B8;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 2.8px;
+  text-transform: uppercase;
+}
+
+.lavi-security-primary,
+.lavi-security-legacy,
+.lavi-security-secondary {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 8px !important;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 900 !important;
+}
+
+.lavi-security-primary {
+  border: 0;
+  background: linear-gradient(135deg, #2DD4BF, #7DD3FC);
+  color: #06221F;
+  box-shadow:
+    0 16px 34px rgba(45,212,191,.22),
+    inset 0 1px 0 rgba(255,255,255,.36);
+  margin-bottom: 12px;
+}
+
+.lavi-security-primary:disabled {
+  opacity: .64;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.lavi-security-hint {
+  margin: 8px 0 14px;
+  color: #94A3B8;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.lavi-security-pin {
+  text-align: center !important;
+  font-size: 18px !important;
+  letter-spacing: 3px !important;
+  margin-bottom: 10px !important;
+}
+
+.lavi-security-message {
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(239,68,68,.30);
+  background: rgba(239,68,68,.12);
+  color: #FCA5A5;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.lavi-security-legacy {
+  border: 0;
+  color: #FFFFFF;
+  background: linear-gradient(135deg, #F97316, #FB7185);
+  margin-bottom: 10px;
+}
+
+.lavi-security-secondary {
+  border: 1px solid rgba(148,163,184,.20);
+  background: rgba(15,23,42,.66);
   color: #CBD5E1;
   font-size: 13px;
 }
@@ -3019,7 +3187,7 @@ body {
   @page { margin: 1cm; }
 }
   </style>
-      <link rel="manifest" href="/manifest.json?v=1.2.42">
+      <link rel="manifest" href="/manifest.json?v=1.2.43">
 </head>
 <body>
 <div id="root"></div>
@@ -3118,7 +3286,7 @@ function gerarCodigo(){
   return Math.random().toString(36).substring(2,8).toUpperCase();
 }
 
-const APP_VERSION = "1.2.42";
+const APP_VERSION = "1.2.43";
 const PRIMARY_APP_URL = "https://www.laviapp.com.br/app.html";
 const PRODUCTION_APP_URL = "https://gastos-familiar-46912.web.app/app.html";
 const LAVIAPP_FUNCTIONS_URL = "https://us-central1-gastos-familiar-46912.cloudfunctions.net";
@@ -4998,17 +5166,17 @@ function SecurityGate({user, children}){
   }
 
   if(!locked) return children;
-  return e("div",{style:{minHeight:"100vh",background:"radial-gradient(circle at top,#20203A 0%,#0F0F1A 55%,#090913 100%)",display:"flex",alignItems:"center",justifyContent:"center",padding:24,color:"#F0EDE8"}},
-    e("div",{style:{width:"100%",maxWidth:390,background:"#16162A",border:"1px solid #2A2A40",borderRadius:28,padding:"30px 24px",boxShadow:"0 28px 70px #00000088",textAlign:"center"}},
-      e("img",{src:LOGO_LOGIN,style:{width:80,height:80,marginBottom:16,filter:"drop-shadow(0 12px 32px rgba(30,80,240,.45))"}}),
-      e("div",{style:{fontFamily:BRAND.font,fontSize:26,fontWeight:800,color:"#F1F5F9",letterSpacing:"-0.045em",margin:0,lineHeight:1}},"Lavi",e("span",{style:{color:BRAND.teal}},"App")),
-      e("div",{style:{fontFamily:"Inter,sans-serif",fontSize:10,letterSpacing:"3.5px",color:"#64748B",textTransform:"uppercase",marginTop:6,marginBottom:18,fontWeight:600}},"Finanças Familiar · App Protegido"),
-      (cfg.biometricEnabled||canUseBiometrics())&&e("button",{onClick:unlockBio,disabled:busy,style:{width:"100%",padding:"15px",borderRadius:16,background:"linear-gradient(135deg,#4ECDC4,#2EAF9F)",border:"none",color:"#0F0F1A",fontFamily:"inherit",fontWeight:800,fontSize:14,cursor:busy?"not-allowed":"pointer",marginBottom:12}},busy?"Aguardando...":"⌘ Entrar com digital / Face ID"),
-      e("div",{style:{fontSize:11,color:"#777",margin:"8px 0 12px",lineHeight:1.5}},"A digital/Face ID usa a segurança do próprio aparelho. Se preferir, use e-mail e senha para entrar nesta sessão."),
-      cfg.pinHash&&e("input",{type:"password",inputMode:"numeric",value:pin,onChange:ev=>setPin(ev.target.value),onKeyDown:ev=>ev.key==="Enter"&&unlockPin(),placeholder:"Senha antiga do app",style:{...S.inp,textAlign:"center",fontSize:18,letterSpacing:3,marginBottom:10}}),
-      msg&&e("div",{style:{background:"#FF6B6B18",border:"1px solid #FF6B6B44",borderRadius:12,padding:"9px 12px",fontSize:12,color:"#FF6B6B",marginBottom:10}},msg),
-      cfg.pinHash&&e("button",{onClick:unlockPin,style:{width:"100%",padding:"13px",borderRadius:16,background:"linear-gradient(135deg,#FF6B6B,#FF8E53)",border:"none",color:"#fff",fontFamily:"inherit",fontWeight:800,fontSize:14,cursor:"pointer",marginBottom:10}},"Entrar com senha antiga"),
-      e("button",{onClick:()=>signOut(auth),style:{width:"100%",padding:"12px",borderRadius:16,background:"#2A2A40",border:"1px solid #34344E",color:"#F0EDE8",fontSize:12,cursor:"pointer",fontFamily:"inherit"}},"Usar e-mail e senha")
+  return e("main",{className:"lavi-security-shell"},
+    e("section",{className:"lavi-security-card"},
+      e("img",{src:LOGO_LOGIN,alt:"LaviApp",className:"lavi-security-logo"}),
+      BrandLockup({className:"lavi-security-lockup"}),
+      e("div",{className:"lavi-security-eyebrow"},"Finanças Familiar · App Protegido"),
+      (cfg.biometricEnabled||canUseBiometrics())&&e("button",{onClick:unlockBio,disabled:busy,className:"lavi-security-primary"},busy?"Aguardando...":"Entrar com digital / Face ID"),
+      e("div",{className:"lavi-security-hint"},"A digital/Face ID usa a segurança do próprio aparelho. Se preferir, use e-mail e senha para entrar nesta sessão."),
+      cfg.pinHash&&e("input",{type:"password",inputMode:"numeric",value:pin,onChange:ev=>setPin(ev.target.value),onKeyDown:ev=>ev.key==="Enter"&&unlockPin(),placeholder:"Senha antiga do app",className:"lavi-security-pin",style:S.inp}),
+      msg&&e("div",{className:"lavi-security-message"},msg),
+      cfg.pinHash&&e("button",{onClick:unlockPin,className:"lavi-security-legacy"},"Entrar com senha antiga"),
+      e("button",{onClick:()=>signOut(auth),className:"lavi-security-secondary"},"Usar e-mail e senha")
     )
   );
 }
