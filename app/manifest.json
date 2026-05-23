@@ -2,7 +2,7 @@
   "name": "LaviApp - Financas Familiar",
   "short_name": "LaviApp",
   "description": "Aplicativo de gestao financeira familiar.",
-  "start_url": "/app.html?v=1.2.43",
+  "start_url": "/app.html?v=1.2.44",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
@@ -28,7 +28,7 @@
     {
       "name": "Adicionar Gasto",
       "short_name": "Gasto",
-      "url": "/app.html?v=1.2.43&action=add",
+      "url": "/app.html?v=1.2.44&action=add",
       "icons": [
         {
           "src": "/icon-192.png",
@@ -40,7 +40,7 @@
     {
       "name": "Painel",
       "short_name": "Painel",
-      "url": "/app.html?v=1.2.43&action=dashboard",
+      "url": "/app.html?v=1.2.44&action=dashboard",
       "icons": [
         {
           "src": "/icon-192.png",

@@ -1,8 +1,8 @@
-const CACHE_NAME = "laviapp-shell-v1.2.43";
+const CACHE_NAME = "laviapp-shell-v1.2.44";
 const APP_SHELL = [
   "/",
-  "/app.html?v=1.2.43",
-  "/manifest.json?v=1.2.43",
+  "/app.html?v=1.2.44",
+  "/manifest.json?v=1.2.44",
   "/stripe-config.js",
   "/hero-family-laviapp.jpg",
   "/legal.css?v=1.0",
@@ -50,10 +50,10 @@ self.addEventListener("fetch", event => {
       fetch(req)
         .then(resp => {
           const copy = resp.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put("/app.html?v=1.2.43", copy));
+          caches.open(CACHE_NAME).then(cache => cache.put("/app.html?v=1.2.44", copy));
           return resp;
         })
-        .catch(() => caches.match("/app.html?v=1.2.43"))
+        .catch(() => caches.match("/app.html?v=1.2.44"))
     );
     return;
   }
